@@ -1,6 +1,6 @@
 {
   "name": "@dccs/react-datagrid-plain",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A light datagrid build upon react-table-plain for React.",
   "main": "lib/index.js",
   "scripts": {
