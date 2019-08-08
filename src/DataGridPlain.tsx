@@ -15,7 +15,7 @@ export type OnLoadData = (
   filter: { [key: string]: any }
 ) => Promise<{ total: number; data: any[] }>;
 
-interface IRenderPagingProps extends IState {
+export interface IRenderPagingProps extends IState {
   handleChangePage: (page: number) => void;
   handleChangeRowsPerPage: (rows: number) => void;
 }
