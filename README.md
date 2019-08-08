@@ -1,4 +1,4 @@
-# react-datagrid-mui &middot; ![travis build](https://img.shields.io/travis/DCCS-IT-Business-Solutions/react-datagrid-mui.svg) ![npm version](https://img.shields.io/npm/v/@dccs/react-datagrid-mui.svg)
+# react-datagrid-plain &middot; ![travis build](https://img.shields.io/travis/DCCS-IT-Business-Solutions/react-datagrid-plain.svg) ![npm version](https://img.shields.io/npm/v/@dccs/react-datagrid-plain.svg)
 
 A light datagrid build upon react-table-mui for React.
 
