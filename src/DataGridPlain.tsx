@@ -46,7 +46,7 @@ export function DataGridPlain(props: IDataGridProps) {
       page: 0,
       total: 0,
       orderBy: props.initialOrderBy
-        ? props.colDef.find(c => c.props === props.initialOrderBy)
+        ? props.colDef.find(c => c.prop === props.initialOrderBy)
         : undefined,
       desc: false,
       filter: {},

@@ -24,18 +24,32 @@ const sampleData1 = [
 ];
 
 const demoColDefs = [
-  { prop: "name", header: "Name" },
+  { prop: "name", header: "Name", sortable: true },
   { prop: "number", header: "Zahl" }
 ];
 
-storiesOf("DataGridPlain", module).add("simple", () => (
-  <DataGridPlain
-    colDef={demoColDefs}
-    onLoadData={() =>
-      new Promise(res => res({ total: sampleData1.length, data: sampleData1 }))
-    }
-  />
-));
+storiesOf("DataGridPlain", module)
+  .add("simple", () => (
+    <DataGridPlain
+      colDef={demoColDefs}
+      onLoadData={() =>
+        new Promise(res =>
+          res({ total: sampleData1.length, data: sampleData1 })
+        )
+      }
+    />
+  ))
+  .add("initialOrderBy", () => (
+    <DataGridPlain
+      initialOrderBy="name"
+      colDef={demoColDefs}
+      onLoadData={(x, y, orderBy) => {
+        return new Promise(res =>
+          res({ total: sampleData1.length, data: sampleData1 })
+        );
+      }}
+    />
+  ));
 
 storiesOf("DataGridMui", module).add("simple", () => (
   <DataGridPlain
