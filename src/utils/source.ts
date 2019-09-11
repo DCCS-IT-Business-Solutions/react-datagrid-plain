@@ -13,8 +13,11 @@ export const createSource = (
   const urlSep = url.indexOf("?") === -1 ? "?" : "&";
   const p = new Promise<{ total: number; data: any[] }>((res, rej) => {
     get(
-      `${url}${urlSep}page=${page}&count=${rowsPerPage}&orderBy=${orderBy}&desc=${sort ===
-        "desc"}${serializeFilter(filter || {})}`
+      `${url}${urlSep}page=${page}&count=${rowsPerPage}${
+        orderBy != null ? "&orderBy=" + orderBy : ""
+      }${sort != null ? "&desc=" + (sort === "desc") : ""}${serializeFilter(
+        filter || {}
+      )}`
     )
       .then(resp => res({ data: resp.data, total: resp.total }))
       .catch(rej);
@@ -36,9 +39,11 @@ export const createJsonServerSource = (
   const urlSep = url.indexOf("?") === -1 ? "?" : "&";
   const p = new Promise<{ total: number; data: any[] }>((res, rej) => {
     get(
-      `${url}${urlSep}_page=${page}&_limit=${rowsPerPage}&_sort=${orderBy}&_order=${sort}${serializeFilter(
-        filter || {}
-      )}`
+      `${url}${urlSep}_page=${page}&_limit=${rowsPerPage}&{
+        orderBy != null ? "_sort=" + orderBy : ""
+      }
+      }${sort != null ? "&_order=" + sort : ""}
+      ${serializeFilter(filter || {})}`
     )
       .then(resp => res({ data: resp, total: resp.length }))
       .catch(rej);
