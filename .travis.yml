@@ -10,4 +10,4 @@ deploy:
   api_key:
     secure: $NPM_API_KEY
   on:
-    repo: DCCS-IT-Business-Solutions/react-datagrid-mui
+    repo: DCCS-IT-Business-Solutions/react-datagrid-plain
