@@ -22,8 +22,8 @@ export interface IRenderPagingProps extends IState {
 
 export interface IDataGridProps {
   colDef: IColDef[];
-  initalRowsPerPage?: number;
-  initalOrderBy?: string;
+  initialRowsPerPage?: number;
+  initialOrderBy?: string;
   onLoadData: OnLoadData;
   disablePaging?: boolean;
   tableTheme?: any;
@@ -42,11 +42,11 @@ export function DataGridPlain(props: IDataGridProps) {
   const privateReducer = React.useReducer<React.Reducer<IState, IAction>>(
     reducer,
     {
-      rowsPerPage: props.initalRowsPerPage || 10,
+      rowsPerPage: props.initialRowsPerPage || 10,
       page: 0,
       total: 0,
-      orderBy: props.initalOrderBy
-        ? props.colDef.find(c => c.props === props.initalOrderBy)
+      orderBy: props.initialOrderBy
+        ? props.colDef.find(c => c.props === props.initialOrderBy)
         : undefined,
       desc: false,
       filter: {},
