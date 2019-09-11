@@ -46,31 +46,28 @@ export function reducer(
   }
 }
 
-export function DataGridStateProvider({
-  children
-}: {
+interface IDataGripStateProviderProps {
   children: React.ReactNode;
-}) {
+  initialOrderBy?: string;
+  initialSort?: "asc" | "desc";
+}
+
+export function DataGridStateProvider(props: IDataGripStateProviderProps) {
   const [state, dispatch] = React.useReducer<React.Reducer<IState, IAction>>(
     reducer,
-    createDefaultState()
+    {
+      rowsPerPage: 10,
+      page: 0,
+      total: 0,
+      orderBy: props.initialOrderBy,
+      sort: "asc",
+      filter: {}
+    }
   );
 
   return (
     <DataGridState.Provider value={{ state, dispatch }}>
-      {children}
+      {props.children}
     </DataGridState.Provider>
   );
-}
-
-function createDefaultState(): IState {
-  return {
-    rowsPerPage: 10,
-    page: 0,
-    total: 0,
-    orderBy: undefined,
-    desc: false,
-    filter: {},
-    reloadDummy: false
-  };
 }

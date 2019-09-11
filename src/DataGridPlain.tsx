@@ -2,7 +2,8 @@ import * as React from "react";
 import {
   TablePlain,
   IColDef,
-  IProps as ITableProps
+  ITablePlainProps as ITableProps,
+  SortDirection
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
 import { DataGridState, reducer, IAction } from "./DataGridStateContext";
@@ -10,8 +11,8 @@ import { DataGridState, reducer, IAction } from "./DataGridStateContext";
 export type OnLoadData = (
   page: number,
   rowsPerPage: number,
-  orderBy: string,
-  desc: boolean,
+  orderBy: string | undefined,
+  sort: SortDirection | undefined,
   filter: { [key: string]: any }
 ) => Promise<{ total: number; data: any[] }>;
 
@@ -24,6 +25,7 @@ export interface IDataGridProps {
   colDef: IColDef[];
   initialRowsPerPage?: number;
   initialOrderBy?: string;
+  initialSort?: SortDirection;
   onLoadData: OnLoadData;
   disablePaging?: boolean;
   tableTheme?: any;
@@ -34,6 +36,21 @@ export interface IDataGridProps {
   renderLoading?: () => React.ReactElement;
   renderError?: (load: () => void) => React.ReactElement;
   renderPaging?: (props: IRenderPagingProps) => React.ReactElement;
+  renderHeaderCell?: (col: IColDef, idx: number) => React.ReactNode;
+  renderFooterCell?: (
+    col: IColDef,
+    data: any[],
+    idx: number
+  ) => React.ReactNode;
+  renderFilter?: (col: IColDef, idx: number) => React.ReactNode;
+  renderExpansionIndicator?: (expanded: boolean) => React.ReactNode;
+  rowProps?: (data: any) => object;
+  cellProps?: (data: any) => object;
+  ellipsis?: boolean;
+  selectedRow?: any | any[];
+  onChangeSelectedRow?: (data: any) => void;
+  selectedRowProps?: (data: any) => object;
+  rowSelectionColumnName?: string;
 }
 
 export function DataGridPlain(props: IDataGridProps) {
@@ -45,12 +62,9 @@ export function DataGridPlain(props: IDataGridProps) {
       rowsPerPage: props.initialRowsPerPage || 10,
       page: 0,
       total: 0,
-      orderBy: props.initialOrderBy
-        ? props.colDef.find(c => c.prop === props.initialOrderBy)
-        : undefined,
-      desc: false,
-      filter: {},
-      reloadDummy: false
+      orderBy: props.initialOrderBy,
+      sort: props.initialSort,
+      filter: {}
     }
   ); // ...if not, we need to create the state.
 
@@ -71,8 +85,8 @@ export function DataGridPlain(props: IDataGridProps) {
       .onLoadData(
         state.page + 1,
         state.rowsPerPage,
-        state.orderBy ? (state.orderBy! as IColDef).prop : "",
-        state.desc,
+        state.orderBy,
+        state.sort,
         state.filter
       )
       .then(({ data: d, total }) => {
@@ -88,9 +102,8 @@ export function DataGridPlain(props: IDataGridProps) {
     state.rowsPerPage,
     state.page,
     state.orderBy,
-    state.desc,
+    state.sort === "desc",
     state.filter,
-    state.reloadDummy,
     props,
     dispatch
   ]);
@@ -103,8 +116,8 @@ export function DataGridPlain(props: IDataGridProps) {
       .onLoadData(
         state.page + 1,
         state.rowsPerPage,
-        state.orderBy ? (state.orderBy! as IColDef).prop : "",
-        state.desc,
+        state.orderBy,
+        state.sort,
         state.filter
       )
       .then(({ data: d, total }) => {
@@ -126,26 +139,26 @@ export function DataGridPlain(props: IDataGridProps) {
     dispatch({ type: "set-rowsperpage", payload: rows });
   }
 
-  function handleChangeOrderBy(colDef: IColDef) {
-    let desc = false;
+  function handleChangeOrderBy(orderBy: string) {
+    let sort: SortDirection | undefined;
 
-    if (state.orderBy && state.orderBy.prop === colDef.prop) {
-      desc = !state.desc;
+    if (state.orderBy && state.orderBy === orderBy) {
+      sort = state.sort === "desc" ? "asc" : "desc";
     }
 
-    dispatch({ type: "set-orderBy", payload: { orderBy: colDef, desc } });
+    dispatch({ type: "set-orderBy", payload: { orderBy, sort } });
   }
 
-  function handleChangeFilter(colDef: IColDef, value: any) {
-    dispatch({ type: "set-filter", payload: { [colDef.prop]: value } });
+  function handleChangeFilter(orderBy: string, value: any) {
+    dispatch({ type: "set-filter", payload: { [orderBy]: value } });
   }
 
   function renderTable() {
     const ps = {
       data,
       colDef: props.colDef,
-      orderedBy: state.orderBy,
-      desc: state.desc,
+      orderBy: state.orderBy,
+      sort: state.sort,
       onChangeOrderBy: handleChangeOrderBy,
       onChangeFilter: handleChangeFilter,
       onRowClick: props.onRowClick,
