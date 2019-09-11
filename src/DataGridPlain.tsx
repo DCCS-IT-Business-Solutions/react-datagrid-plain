@@ -13,7 +13,7 @@ export type OnLoadData = (
   rowsPerPage: number,
   orderBy: string | undefined,
   sort: SortDirection | undefined,
-  filter: { [key: string]: any }
+  filter: { [key: string]: any } | undefined
 ) => Promise<{ total: number; data: any[] }>;
 
 export interface IRenderPagingProps extends IState {
