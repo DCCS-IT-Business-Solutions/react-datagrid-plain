@@ -22,7 +22,8 @@ export interface IRenderPagingProps extends IState {
 
 interface IProps {
   colDef: IColDef[];
-  initRowsPerPage?: number;
+  initalRowsPerPage?: number;
+  initalOrderBy?: string;
   onLoadData: OnLoadData;
   disablePaging?: boolean;
   tableTheme?: any;
@@ -40,7 +41,17 @@ export function DataGridPlain(props: IProps) {
   let stateContext = React.useContext(DataGridState);
   const privateReducer = React.useReducer<React.Reducer<IState, IAction>>(
     reducer,
-    createDefaultState()
+    {
+      rowsPerPage: props.initalRowsPerPage || 10,
+      page: 0,
+      total: 0,
+      orderBy: props.initalOrderBy
+        ? props.colDef.find(c => c.props === props.initalOrderBy)
+        : undefined,
+      desc: false,
+      filter: {},
+      reloadDummy: false
+    }
   ); // ...if not, we need to create the state.
 
   if (stateContext === undefined) {
@@ -191,16 +202,4 @@ export function DataGridPlain(props: IProps) {
       {props.disablePaging !== true && renderPaging()}
     </div>
   );
-}
-
-function createDefaultState(): IState {
-  return {
-    rowsPerPage: 10,
-    page: 0,
-    total: 0,
-    orderBy: undefined,
-    desc: false,
-    filter: {},
-    reloadDummy: false
-  };
 }
