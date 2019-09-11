@@ -1,3 +1,5 @@
+import { SortDirection } from "@dccs/react-table-plain";
+
 export const createSource = (
   get: (url: string) => Promise<any>,
   url: string
@@ -5,15 +7,14 @@ export const createSource = (
   page: number,
   rowsPerPage: number,
   orderBy: string,
-  desc: boolean,
+  sort: SortDirection | undefined,
   filter?: { [key: string]: any }
 ) => {
   const urlSep = url.indexOf("?") === -1 ? "?" : "&";
   const p = new Promise<{ total: number; data: any[] }>((res, rej) => {
     get(
-      `${url}${urlSep}page=${page}&count=${rowsPerPage}&orderBy=${orderBy}&desc=${desc}${serializeFilter(
-        filter || {}
-      )}`
+      `${url}${urlSep}page=${page}&count=${rowsPerPage}&orderBy=${orderBy}&desc=${sort ===
+        "desc"}${serializeFilter(filter || {})}`
     )
       .then(resp => res({ data: resp.data, total: resp.total }))
       .catch(rej);
@@ -29,15 +30,15 @@ export const createJsonServerSource = (
   page: number,
   rowsPerPage: number,
   orderBy: string,
-  desc: boolean,
+  sort: SortDirection | undefined,
   filter?: { [key: string]: any }
 ) => {
   const urlSep = url.indexOf("?") === -1 ? "?" : "&";
   const p = new Promise<{ total: number; data: any[] }>((res, rej) => {
     get(
-      `${url}${urlSep}_page=${page}&_limit=${rowsPerPage}&_sort=${orderBy}&_order=${
-        desc ? "desc" : "asc"
-      }${serializeFilter(filter || {})}`
+      `${url}${urlSep}_page=${page}&_limit=${rowsPerPage}&_sort=${orderBy}&_order=${sort}${serializeFilter(
+        filter || {}
+      )}`
     )
       .then(resp => res({ data: resp, total: resp.length }))
       .catch(rej);
