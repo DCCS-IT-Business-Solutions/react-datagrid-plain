@@ -6,7 +6,7 @@ export const createSource = (
 ) => (
   page: number,
   rowsPerPage: number,
-  orderBy: string,
+  orderBy: string | undefined,
   sort: SortDirection | undefined,
   filter?: { [key: string]: any }
 ) => {
@@ -29,7 +29,7 @@ export const createJsonServerSource = (
 ) => (
   page: number,
   rowsPerPage: number,
-  orderBy: string,
+  orderBy: string | undefined,
   sort: SortDirection | undefined,
   filter?: { [key: string]: any }
 ) => {
