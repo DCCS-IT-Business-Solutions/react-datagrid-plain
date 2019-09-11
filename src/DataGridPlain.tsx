@@ -20,7 +20,7 @@ export interface IRenderPagingProps extends IState {
   handleChangeRowsPerPage: (rows: number) => void;
 }
 
-interface IProps {
+export interface IDataGridProps {
   colDef: IColDef[];
   initalRowsPerPage?: number;
   initalOrderBy?: string;
@@ -36,7 +36,7 @@ interface IProps {
   renderPaging?: (props: IRenderPagingProps) => React.ReactElement;
 }
 
-export function DataGridPlain(props: IProps) {
+export function DataGridPlain(props: IDataGridProps) {
   // Do we have a custom context,...
   let stateContext = React.useContext(DataGridState);
   const privateReducer = React.useReducer<React.Reducer<IState, IAction>>(
