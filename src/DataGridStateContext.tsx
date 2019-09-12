@@ -1,50 +1,20 @@
 import * as React from "react";
 import { IState } from "./IState";
+import { SortDirection } from "@dccs/react-table-plain";
 
-export interface IDataGridStateContext {
-  state: IState;
-  dispatch: React.Dispatch<IAction>;
+export interface IDataGridStateContext extends IState {
+  setTotal: (total: number) => void;
+  setPage: (page: number) => void;
+  setRowsPerPage: (rpp: number) => void;
+  setOrderBy: (orderBy: string) => void;
+  setSort: (sort: SortDirection | undefined) => void;
+  setFilter: (filter: { [key: string]: any } | undefined) => void;
+  reload: () => void;
 }
 
 export const DataGridState = React.createContext<
   IDataGridStateContext | undefined
 >(undefined);
-
-type ReducerActionType =
-  | "set-total"
-  | "set-page"
-  | "set-rowsperpage"
-  | "set-orderBy"
-  | "set-filter"
-  | "reload";
-
-export interface IAction {
-  type: ReducerActionType;
-  payload: any;
-}
-
-export function reducer(
-  s: any,
-  action: { type: ReducerActionType; payload: any }
-) {
-  switch (action.type) {
-    case "set-total":
-      return { ...s, total: action.payload };
-    case "set-page":
-      return { ...s, page: action.payload };
-    case "set-rowsperpage":
-      return { ...s, rowsPerPage: action.payload };
-    case "set-orderBy":
-      return { ...s, ...action.payload };
-    case "set-filter":
-      return { ...s, filter: { ...s.filter, ...action.payload } };
-    case "reload":
-      return { ...s, reloadDummy: !s.reloadDummy };
-
-    default:
-      throw new Error();
-  }
-}
 
 interface IDataGripStateProviderProps {
   children: React.ReactNode;
@@ -53,20 +23,34 @@ interface IDataGripStateProviderProps {
 }
 
 export function DataGridStateProvider(props: IDataGripStateProviderProps) {
-  const [state, dispatch] = React.useReducer<React.Reducer<IState, IAction>>(
-    reducer,
-    {
-      rowsPerPage: 10,
-      page: 0,
-      total: 0,
-      orderBy: props.initialOrderBy,
-      sort: "asc",
-      filter: {}
-    }
-  );
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [page, setPage] = React.useState(0);
+  const [total, setTotal] = React.useState(0);
+  const [orderBy, setOrderBy] = React.useState(props.initialOrderBy);
+  const [sort, setSort] = React.useState<SortDirection | undefined>();
+  const [filter, setFilter] = React.useState<
+    { [key: string]: any } | undefined
+  >();
+  const [reloadDummy, setReloadDummy] = React.useState(false);
 
   return (
-    <DataGridState.Provider value={{ state, dispatch }}>
+    <DataGridState.Provider
+      value={{
+        rowsPerPage,
+        setRowsPerPage,
+        page,
+        setPage,
+        total,
+        setTotal,
+        orderBy,
+        setOrderBy,
+        sort,
+        setSort,
+        filter,
+        setFilter,
+        reload: () => setReloadDummy(!reloadDummy)
+      }}
+    >
       {props.children}
     </DataGridState.Provider>
   );

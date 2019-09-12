@@ -6,5 +6,5 @@ export interface IState {
   total: number;
   orderBy?: string;
   sort?: SortDirection;
-  filter: { [key: string]: any };
+  filter?: { [key: string]: any };
 }

@@ -6,7 +6,7 @@ import {
   SortDirection
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
-import { DataGridState, reducer, IAction } from "./DataGridStateContext";
+import { DataGridState } from "./DataGridStateContext";
 
 export type OnLoadData = (
   page: number,
@@ -54,25 +54,39 @@ export interface IDataGridProps {
 }
 
 export function DataGridPlain(props: IDataGridProps) {
+  // Internal state...if there is no DataGridStateProvider.
+  const [rowsPerPage, setRowsPerPage] = React.useState(
+    props.initialRowsPerPage || 10
+  );
+  const [page, setPage] = React.useState(0);
+  const [total, setTotal] = React.useState(0);
+  const [orderBy, setOrderBy] = React.useState(props.initialOrderBy);
+  const [sort, setSort] = React.useState<SortDirection | undefined>();
+  const [filter, setFilter] = React.useState<
+    { [key: string]: any } | undefined
+  >();
+
   // Do we have a custom context,...
-  let stateContext = React.useContext(DataGridState);
-  const privateReducer = React.useReducer<React.Reducer<IState, IAction>>(
-    reducer,
-    {
-      rowsPerPage: props.initialRowsPerPage || 10,
-      page: 0,
-      total: 0,
-      orderBy: props.initialOrderBy,
-      sort: props.initialSort,
-      filter: {}
+  const state = React.useContext(DataGridState) || {
+    rowsPerPage,
+    setRowsPerPage,
+    page,
+    setPage,
+    total,
+    setTotal,
+    orderBy,
+    setOrderBy,
+    sort,
+    setSort,
+    filter,
+    setFilter,
+    reload: () => {
+      throw new Error(
+        "No supported in DateGridPlain, only in DataGridStateProvider."
+      );
     }
-  ); // ...if not, we need to create the state.
+  };
 
-  if (stateContext === undefined) {
-    stateContext = { state: privateReducer[0], dispatch: privateReducer[1] };
-  }
-
-  const { state, dispatch } = stateContext!;
   const [data, setData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(false);
@@ -89,8 +103,8 @@ export function DataGridPlain(props: IDataGridProps) {
         state.sort,
         state.filter
       )
-      .then(({ data: d, total }) => {
-        dispatch({ type: "set-total", payload: total });
+      .then(({ data: d, total: t }) => {
+        state.setTotal(t);
         setData(d);
         setLoading(false);
       })
@@ -104,8 +118,7 @@ export function DataGridPlain(props: IDataGridProps) {
     state.orderBy,
     state.sort === "desc",
     state.filter,
-    props,
-    dispatch
+    props
   ]);
 
   function load() {
@@ -120,8 +133,8 @@ export function DataGridPlain(props: IDataGridProps) {
         state.sort,
         state.filter
       )
-      .then(({ data: d, total }) => {
-        dispatch({ type: "set-total", payload: total });
+      .then(({ data: d, total: t }) => {
+        state.setTotal(t);
         setData(d);
         setLoading(false);
       })
@@ -131,26 +144,27 @@ export function DataGridPlain(props: IDataGridProps) {
       });
   }
 
-  function handleChangePage(page: number) {
-    dispatch({ type: "set-page", payload: page });
+  function handleChangePage(p: number) {
+    state.setPage(p);
   }
 
   function handleChangeRowsPerPage(rows: number) {
-    dispatch({ type: "set-rowsperpage", payload: rows });
+    state.setRowsPerPage(rows);
   }
 
-  function handleChangeOrderBy(orderBy: string) {
-    let sort: SortDirection | undefined;
+  function handleChangeOrderBy(ob: string) {
+    let s: SortDirection | undefined;
 
-    if (state.orderBy && state.orderBy === orderBy) {
-      sort = state.sort === "desc" ? "asc" : "desc";
+    if (state.orderBy && state.orderBy === ob) {
+      s = state.sort === "desc" ? "asc" : "desc";
     }
 
-    dispatch({ type: "set-orderBy", payload: { orderBy, sort } });
+    state.setOrderBy(ob);
+    state.setSort(s);
   }
 
-  function handleChangeFilter(orderBy: string, value: any) {
-    dispatch({ type: "set-filter", payload: { [orderBy]: value } });
+  function handleChangeFilter(ob: string, value: any) {
+    state.setFilter({ ...state.filter, [ob]: value });
   }
 
   function renderTable() {
