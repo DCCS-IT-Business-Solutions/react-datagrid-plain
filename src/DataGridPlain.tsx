@@ -3,7 +3,8 @@ import {
   TablePlain,
   IColDef,
   ITablePlainProps as ITableProps,
-  SortDirection
+  SortDirection,
+  ChangeFilterHandler
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
 import { DataGridState } from "./DataGridStateContext";
@@ -51,6 +52,8 @@ export interface IDataGridProps {
   onChangeSelectedRow?: (data: any) => void;
   selectedRowProps?: (data: any) => object;
   rowSelectionColumnName?: string;
+  onChangeFilter?: ChangeFilterHandler;
+  filter?: object;
 }
 
 export function DataGridPlain(props: IDataGridProps) {
@@ -78,7 +81,7 @@ export function DataGridPlain(props: IDataGridProps) {
     setOrderBy,
     sort,
     setSort,
-    filter,
+    filter: props.filter || filter,
     setFilter,
     reload: () => {
       throw new Error(
@@ -164,7 +167,11 @@ export function DataGridPlain(props: IDataGridProps) {
   }
 
   function handleChangeFilter(ob: string, value: any) {
-    state.setFilter({ ...state.filter, [ob]: value });
+    if (props.onChangeFilter) {
+      props.onChangeFilter(ob, value);
+    } else {
+      state.setFilter({ ...state.filter, [ob]: value });
+    }
   }
 
   function renderTable() {
@@ -173,6 +180,7 @@ export function DataGridPlain(props: IDataGridProps) {
       colDef: props.colDef,
       orderBy: state.orderBy,
       sort: state.sort,
+      filter: state.filter,
       onChangeOrderBy: handleChangeOrderBy,
       onChangeFilter: handleChangeFilter,
       onRowClick: props.onRowClick,
