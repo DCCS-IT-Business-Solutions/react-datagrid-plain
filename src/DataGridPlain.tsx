@@ -184,7 +184,11 @@ export function DataGridPlain(props: IDataGridProps) {
       onChangeOrderBy: handleChangeOrderBy,
       onChangeFilter: handleChangeFilter,
       onRowClick: props.onRowClick,
-      subComponent: props.subComponent
+      subComponent: props.subComponent,
+      selectedRow: props.selectedRow,
+      selectedRowProps: props.selectedRowProps,
+      onChangeSelectedRow: props.onChangeSelectedRow,
+      rowSelectionColumnName: props.rowSelectionColumnName
     };
     if (props.renderTable != null) {
       return props.renderTable(ps);
