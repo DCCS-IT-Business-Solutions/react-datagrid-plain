@@ -28,6 +28,32 @@ const demoColDefs = [
   { prop: "number", header: "Zahl" }
 ];
 
+function SelectedRowExample() {
+  const [selectedRow, setSelectedRow] = React.useState();
+
+  const handleEditMode = (data: any) => {
+    setSelectedRow(data);
+  };
+
+  function selectedRowProps(data: any) {
+    return { style: { background: "yellow" } };
+  }
+
+  return (
+    <DataGridPlain
+      selectedRow={selectedRow}
+      selectedRowProps={selectedRowProps}
+      onChangeSelectedRow={handleEditMode}
+      colDef={demoColDefs}
+      onLoadData={() => {
+        return new Promise(res =>
+          res({ total: sampleData1.length, data: sampleData1 })
+        );
+      }}
+    />
+  );
+}
+
 storiesOf("DataGridPlain", module)
   .add("simple", () => (
     <DataGridPlain
@@ -49,7 +75,8 @@ storiesOf("DataGridPlain", module)
         );
       }}
     />
-  ));
+  ))
+  .add("selectedRow", () => <SelectedRowExample />);
 
 storiesOf("DataGridMui", module).add("simple", () => (
   <DataGridPlain
