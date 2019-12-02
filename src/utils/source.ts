@@ -52,12 +52,18 @@ export const createJsonServerSource = (
   return p;
 };
 
-function serializeFilter(filter: { [key: string]: any }) {
+export function serializeFilter(filter: { [key: string]: any }) {
   let query = "";
   // tslint:disable-next-line:forin
   for (const x in filter) {
     if (filter[x] != null) {
-      query += `&${x}=${encodeURIComponent(filter[x])}`;
+      if (Array.isArray(filter[x])) {
+        filter[x].forEach((e: any) => {
+          query += `&${x}=${encodeURIComponent(e)}`;
+        });
+      } else {
+        query += `&${x}=${encodeURIComponent(filter[x])}`;
+      }
     }
   }
   return query;
