@@ -121,7 +121,7 @@ export function DataGridPlain(props: IDataGridProps) {
     state.orderBy,
     state.sort === "desc",
     state.filter,
-    props
+    props.onLoadData
   ]);
 
   function load() {
