@@ -23,10 +23,10 @@ export interface IRenderPagingProps extends IState {
 }
 
 export interface IDataGridTexts {
-  errorText: string;
-  loadingText: string;
-  pagingText: string;
-  reloadText: string;
+  errorText?: string;
+  loadingText?: string;
+  pagingText?: string;
+  reloadText?: string;
 }
 
 export interface IDataGridProps {
