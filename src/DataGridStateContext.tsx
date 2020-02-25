@@ -9,6 +9,7 @@ export interface IDataGridStateContext extends IState {
   setOrderBy: (orderBy: string) => void;
   setSort: (sort: SortDirection | undefined) => void;
   setFilter: (filter: { [key: string]: any } | undefined) => void;
+  reloadDummy: boolean;
   reload: () => void;
 }
 
@@ -48,6 +49,7 @@ export function DataGridStateProvider(props: IDataGripStateProviderProps) {
         setSort,
         filter,
         setFilter,
+        reloadDummy,
         reload: () => setReloadDummy(!reloadDummy)
       }}
     >
