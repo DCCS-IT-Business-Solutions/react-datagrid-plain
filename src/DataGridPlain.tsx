@@ -28,7 +28,6 @@ export interface IDataGridTexts {
   pagingText?: string;
   reloadText?: string;
 }
-
 export interface IDataGridProps {
   texts?: IDataGridTexts;
   colDef: IColDef[];
