@@ -96,9 +96,6 @@ export function DataGridPlain(props: IDataGridProps) {
   const [error, setError] = React.useState(false);
 
   React.useEffect(() => {
-    console.log("useEffect");
-    console.log(state.filter);
-
     setLoading(true);
     setError(false);
 
