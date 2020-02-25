@@ -83,6 +83,7 @@ export function DataGridPlain(props: IDataGridProps) {
     setSort,
     filter: props.filter || filter,
     setFilter,
+    reloadDummy: false,
     reload: () => {
       throw new Error(
         "No supported in DateGridPlain, only in DataGridStateProvider."
@@ -121,7 +122,7 @@ export function DataGridPlain(props: IDataGridProps) {
     state.orderBy,
     state.sort === "desc",
     state.filter,
-    props.onLoadData
+    state.reloadDummy
   ]);
 
   function load() {
