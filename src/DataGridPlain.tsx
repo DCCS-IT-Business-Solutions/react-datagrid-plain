@@ -18,11 +18,43 @@ export type OnLoadData = (
 ) => Promise<{ total: number; data: any[] }>;
 
 export interface IRenderPagingProps extends IState {
+  backIconButtonText?: string;
+  nextIconButtonText?: string;
+  labelRowsPerPage?: string;
+  // Example labelDisplayedRows={({ from, to, count }) => `${from}-${to} von ${count}`}
+  labelDisplayedRows?: ({
+    count,
+    from,
+    to
+  }: {
+    count?: number;
+    from?: number;
+    to?: number;
+  }) => string;
   handleChangePage: (page: number) => void;
   handleChangeRowsPerPage: (rows: number) => void;
 }
 
+export interface IDataGridTexts {
+  errorText?: string;
+  loadingText?: string;
+  pagingText?: string;
+  reloadText?: string;
+  backIconButtonText?: string;
+  nextIconButtonText?: string;
+  labelRowsPerPage?: string;
+  labelDisplayedRows?: ({
+    count,
+    from,
+    to
+  }: {
+    count?: number;
+    from?: number;
+    to?: number;
+  }) => string;
+}
 export interface IDataGridProps {
+  texts?: IDataGridTexts;
   colDef: IColDef[];
   initialRowsPerPage?: number;
   initialOrderBy?: string;
@@ -32,10 +64,13 @@ export interface IDataGridProps {
   tableTheme?: any;
   onRowClick?: (data: any) => void;
   subComponent?: (data: any) => React.ReactNode;
-
   renderTable?: (ps: ITableProps) => React.ReactElement;
   renderLoading?: () => React.ReactElement;
-  renderError?: (load: () => void) => React.ReactElement;
+  renderError?: (
+    load: () => void,
+    errorText?: string,
+    reloadText?: string
+  ) => React.ReactElement;
   renderPaging?: (props: IRenderPagingProps) => React.ReactElement;
   renderHeaderCell?: (col: IColDef, idx: number) => React.ReactNode;
   renderFooterCell?: (
@@ -121,8 +156,13 @@ export function DataGridPlain(props: IDataGridProps) {
     state.page,
     state.orderBy,
     state.sort === "desc",
-    state.filter,
-    state.reloadDummy
+    state.reloadDummy,
+    // Why JSON.stringify?
+    // The way the useEffect dependency array works is by checking for strict (===) equivalency between all of the items in the array from the previous render and the new render.
+    // Example:  {}==={}                                   -> false -> different -> rerender
+    // Example2: JSON.stringify({}) === JSON.stringify({}) -> true  -> same      -> no rerender
+    JSON.stringify(state.filter),
+    JSON.stringify(props)
   ]);
 
   function load() {
@@ -201,18 +241,34 @@ export function DataGridPlain(props: IDataGridProps) {
     if (props.renderLoading != null) {
       return props.renderLoading();
     }
-    return <h5>Loading...</h5>;
+
+    let loadingText = "Loading...";
+    if (props.texts && props.texts.loadingText != null) {
+      loadingText = props.texts.loadingText;
+    }
+
+    return <h5>{loadingText}</h5>;
   }
 
   function renderError() {
+    let errorText = "Die Daten konnten nicht geladen werden.";
+    if (props.texts && props.texts.errorText != null) {
+      errorText = props.texts.errorText;
+    }
+
+    let reloadText = "Neu laden";
+    if (props.texts && props.texts.reloadText != null) {
+      reloadText = props.texts.reloadText;
+    }
+
     if (props.renderError != null) {
-      return props.renderError(load);
+      return props.renderError(load, errorText, reloadText);
     }
     return (
       <p style={{ width: "100%", background: "red", padding: 16 }}>
-        <p>Die Daten konnten nicht geladen werden.</p>
+        <p>{errorText}</p>
         <p>
-          <button onClick={() => load()}>Neu laden</button>
+          <button onClick={() => load()}>{reloadText}</button>
         </p>
       </p>
     );
@@ -220,13 +276,27 @@ export function DataGridPlain(props: IDataGridProps) {
 
   function renderPaging() {
     if (props.renderPaging != null) {
+      const labelRowsPerPage = props.texts && props.texts.labelRowsPerPage;
+      const backIconButtonText = props.texts && props.texts.backIconButtonText;
+      const nextIconButtonText = props.texts && props.texts.nextIconButtonText;
+      const labelDisplayedRows = props.texts && props.texts.labelDisplayedRows;
+
       return props.renderPaging({
         ...state,
+        labelRowsPerPage: labelRowsPerPage,
+        backIconButtonText: backIconButtonText,
+        nextIconButtonText: nextIconButtonText,
+        labelDisplayedRows: labelDisplayedRows,
         handleChangePage,
         handleChangeRowsPerPage
       });
     }
-    return <strong>No paging available right now. Check back later...</strong>;
+    let pagingText = "No paging available right now. Check back later...";
+    if (props.texts && props.texts.pagingText != null) {
+      pagingText = props.texts.pagingText;
+    }
+
+    return <strong>{pagingText}</strong>;
   }
 
   if (error) {
