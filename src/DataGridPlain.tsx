@@ -18,6 +18,19 @@ export type OnLoadData = (
 ) => Promise<{ total: number; data: any[] }>;
 
 export interface IRenderPagingProps extends IState {
+  backIconButtonText?: string;
+  nextIconButtonText?: string;
+  labelRowsPerPage?: string;
+  // Example labelDisplayedRows={({ from, to, count }) => `${from}-${to} von ${count}`}
+  labelDisplayedRows?: ({
+    count,
+    from,
+    to
+  }: {
+    count?: number;
+    from?: number;
+    to?: number;
+  }) => string;
   handleChangePage: (page: number) => void;
   handleChangeRowsPerPage: (rows: number) => void;
 }
@@ -27,6 +40,18 @@ export interface IDataGridTexts {
   loadingText?: string;
   pagingText?: string;
   reloadText?: string;
+  backIconButtonText?: string;
+  nextIconButtonText?: string;
+  labelRowsPerPage?: string;
+  labelDisplayedRows?: ({
+    count,
+    from,
+    to
+  }: {
+    count?: number;
+    from?: number;
+    to?: number;
+  }) => string;
 }
 export interface IDataGridProps {
   texts?: IDataGridTexts;
@@ -41,7 +66,11 @@ export interface IDataGridProps {
   subComponent?: (data: any) => React.ReactNode;
   renderTable?: (ps: ITableProps) => React.ReactElement;
   renderLoading?: () => React.ReactElement;
-  renderError?: (load: () => void) => React.ReactElement;
+  renderError?: (
+    load: () => void,
+    errorText?: string,
+    reloadText?: string
+  ) => React.ReactElement;
   renderPaging?: (props: IRenderPagingProps) => React.ReactElement;
   renderHeaderCell?: (col: IColDef, idx: number) => React.ReactNode;
   renderFooterCell?: (
@@ -214,8 +243,8 @@ export function DataGridPlain(props: IDataGridProps) {
     }
 
     let loadingText = "Loading...";
-    if (props.texts && props.texts.reloadText != null) {
-      loadingText = props.texts.reloadText;
+    if (props.texts && props.texts.loadingText != null) {
+      loadingText = props.texts.loadingText;
     }
 
     return <h5>{loadingText}</h5>;
@@ -233,7 +262,7 @@ export function DataGridPlain(props: IDataGridProps) {
     }
 
     if (props.renderError != null) {
-      return props.renderError(load);
+      return props.renderError(load, errorText, reloadText);
     }
     return (
       <p style={{ width: "100%", background: "red", padding: 16 }}>
@@ -247,8 +276,17 @@ export function DataGridPlain(props: IDataGridProps) {
 
   function renderPaging() {
     if (props.renderPaging != null) {
+      const labelRowsPerPage = props.texts && props.texts.labelRowsPerPage;
+      const backIconButtonText = props.texts && props.texts.backIconButtonText;
+      const nextIconButtonText = props.texts && props.texts.nextIconButtonText;
+      const labelDisplayedRows = props.texts && props.texts.labelDisplayedRows;
+
       return props.renderPaging({
         ...state,
+        labelRowsPerPage: labelRowsPerPage,
+        backIconButtonText: backIconButtonText,
+        nextIconButtonText: nextIconButtonText,
+        labelDisplayedRows: labelDisplayedRows,
         handleChangePage,
         handleChangeRowsPerPage
       });
