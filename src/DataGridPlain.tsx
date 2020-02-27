@@ -157,12 +157,12 @@ export function DataGridPlain(props: IDataGridProps) {
     state.orderBy,
     state.sort === "desc",
     state.reloadDummy,
+    props.onLoadData,
     // Why JSON.stringify?
     // The way the useEffect dependency array works is by checking for strict (===) equivalency between all of the items in the array from the previous render and the new render.
     // Example:  {}==={}                                   -> false -> different -> rerender
     // Example2: JSON.stringify({}) === JSON.stringify({}) -> true  -> same      -> no rerender
-    JSON.stringify(state.filter),
-    JSON.stringify(props)
+    JSON.stringify(state.filter)
   ]);
 
   function load() {
