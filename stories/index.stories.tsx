@@ -7,6 +7,10 @@ import { TablePlain } from "@dccs/react-table-plain";
 import { tableMuiTheme } from "@dccs/react-table-mui";
 import { tableSemanticUITheme } from "@dccs/react-table-semantic-ui";
 import { TablePagination } from "@material-ui/core";
+import {
+  DataGridStateProvider,
+  DataGridState
+} from "../src/DataGridStateContext";
 
 const sampleData1 = [
   { name: "A", number: 1 },
@@ -54,6 +58,41 @@ function SelectedRowExample() {
   );
 }
 
+function InitialLoadWithStateProviderExample() {
+  return (
+    <DataGridStateProvider>
+      <InitialLoadExample />
+    </DataGridStateProvider>
+  );
+}
+
+function InitialLoadExample() {
+  const context = React.useContext(DataGridState);
+
+  return (
+    <React.Fragment>
+      <button
+        onClick={() => {
+          if (context) {
+            context.reload();
+          }
+        }}
+      >
+        RELOAD
+      </button>
+      <DataGridPlain
+        initialLoad={false}
+        colDef={demoColDefs}
+        onLoadData={() => {
+          return new Promise(res =>
+            res({ total: sampleData1.length, data: sampleData1 })
+          );
+        }}
+      />
+    </React.Fragment>
+  );
+}
+
 storiesOf("DataGridPlain", module)
   .add("simple", () => (
     <DataGridPlain
@@ -76,7 +115,8 @@ storiesOf("DataGridPlain", module)
       }}
     />
   ))
-  .add("selectedRow", () => <SelectedRowExample />);
+  .add("selectedRow", () => <SelectedRowExample />)
+  .add("initialLoad: False", () => <InitialLoadWithStateProviderExample />);
 
 storiesOf("DataGridMui", module).add("simple", () => (
   <DataGridPlain
