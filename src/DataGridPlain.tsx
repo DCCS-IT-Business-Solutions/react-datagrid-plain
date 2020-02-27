@@ -55,6 +55,7 @@ export interface IDataGridTexts {
 }
 export interface IDataGridProps {
   texts?: IDataGridTexts;
+  initialLoad?: boolean;
   colDef: IColDef[];
   initialRowsPerPage?: number;
   initialOrderBy?: string;
@@ -91,12 +92,19 @@ export interface IDataGridProps {
   filter?: object;
 }
 
+DataGridPlain.defaultProps = {
+  initialLoad: true
+};
+
 export function DataGridPlain(props: IDataGridProps) {
   // Internal state...if there is no DataGridStateProvider.
   const [rowsPerPage, setRowsPerPage] = React.useState(
     props.initialRowsPerPage || 10
   );
   const [page, setPage] = React.useState(0);
+  const [allowLoad, setAllowLoad] = React.useState(
+    props.initialLoad === true ? true : false
+  );
   const [total, setTotal] = React.useState(0);
   const [orderBy, setOrderBy] = React.useState(props.initialOrderBy);
   const [sort, setSort] = React.useState<SortDirection | undefined>();
@@ -131,26 +139,12 @@ export function DataGridPlain(props: IDataGridProps) {
   const [error, setError] = React.useState(false);
 
   React.useEffect(() => {
-    setLoading(true);
-    setError(false);
-
-    props
-      .onLoadData(
-        state.page + 1,
-        state.rowsPerPage,
-        state.orderBy,
-        state.sort,
-        state.filter
-      )
-      .then(({ data: d, total: t }) => {
-        state.setTotal(t);
-        setData(d);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-        setError(true);
-      });
+    if (allowLoad === true) {
+      load();
+    } else {
+      // allowLoad on second try.
+      setAllowLoad(true);
+    }
   }, [
     state.rowsPerPage,
     state.page,
