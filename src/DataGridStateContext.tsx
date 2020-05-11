@@ -1,16 +1,35 @@
 import * as React from "react";
 import { IState } from "./IState";
 import { SortDirection } from "@dccs/react-table-plain";
+import { useDataGridState } from "./useDataGridState";
 
 export interface IDataGridStateContext extends IState {
+  total: number;
   setTotal: (total: number) => void;
+  page: number;
   setPage: (page: number) => void;
+  rowsPerPage: number;
   setRowsPerPage: (rpp: number) => void;
+  orderBy: string | undefined;
   setOrderBy: (orderBy: string) => void;
+  sort: SortDirection | undefined;
   setSort: (sort: SortDirection | undefined) => void;
+  filter:
+    | {
+        [key: string]: any;
+      }
+    | undefined;
   setFilter: (filter: { [key: string]: any } | undefined) => void;
-  reloadDummy: boolean;
-  reload: () => void;
+  allowLoad: boolean;
+  setAllowLoad: React.Dispatch<React.SetStateAction<boolean>>;
+  error: boolean;
+  setError: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  data: any[];
+  setData: React.Dispatch<React.SetStateAction<any[]>>;
+  forceReload: () => void;
+  reload: boolean;
 }
 
 export const DataGridState = React.createContext<
@@ -18,42 +37,27 @@ export const DataGridState = React.createContext<
 >(undefined);
 
 interface IDataGripStateProviderProps {
-  children: React.ReactNode;
   initialOrderBy?: string;
   initialSort?: "asc" | "desc";
+  initialRowsPerPage?: number;
+  onChangeFilter?: any;
+  initialLoad: boolean;
 }
 
-export function DataGridStateProvider(props: IDataGripStateProviderProps) {
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [page, setPage] = React.useState(0);
-  const [total, setTotal] = React.useState(0);
-  const [orderBy, setOrderBy] = React.useState(props.initialOrderBy);
-  const [sort, setSort] = React.useState<SortDirection | undefined>();
-  const [filter, setFilter] = React.useState<
-    { [key: string]: any } | undefined
-  >();
-  const [reloadDummy, setReloadDummy] = React.useState(false);
+export const DataGridStateProvider: React.FC<IDataGripStateProviderProps> = (
+  props
+) => {
+  const state = useDataGridState({
+    initialLoad: props.initialLoad,
+    initialOrderBy: props.initialOrderBy,
+    initialRowsPerPage: props.initialRowsPerPage,
+    initialSort: props.initialSort,
+    onChangeFilter: props.onChangeFilter,
+  });
 
   return (
-    <DataGridState.Provider
-      value={{
-        rowsPerPage,
-        setRowsPerPage,
-        page,
-        setPage,
-        total,
-        setTotal,
-        orderBy,
-        setOrderBy,
-        sort,
-        setSort,
-        filter,
-        setFilter,
-        reloadDummy,
-        reload: () => setReloadDummy(!reloadDummy)
-      }}
-    >
+    <DataGridState.Provider value={state}>
       {props.children}
     </DataGridState.Provider>
   );
-}
+};
