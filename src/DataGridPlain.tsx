@@ -69,7 +69,6 @@ export interface IDataGridWithInternalStateProps
 export interface IDataGridProps {
   texts?: IDataGridTexts;
   colDef: IColDef[];
-  onLoadData: OnLoadData;
   disablePaging?: boolean;
   tableTheme?: any;
   onRowClick?: (data: any) => void;
@@ -109,92 +108,20 @@ export function DataGridPlain(
 
   const {
     rowsPerPage,
-    setRowsPerPage,
     page,
-    setPage,
     total,
     orderBy,
-    setOrderBy,
     sort,
-    setSort,
     filter,
-    setFilter,
     data,
     loading,
     error,
-    allowLoad,
-    setAllowLoad,
-    setData,
-    setError,
-    setLoading,
-    setTotal,
-    reloadDummy,
+    handleChangeOrderBy,
+    handleChangeFilter,
+    handleChangeRowsPerPage,
+    handleChangePage,
+    load,
   } = (props as IDataGridWithExternalStateProps).state || internalState;
-
-  React.useEffect(() => {
-    if (allowLoad === true) {
-      load();
-    } else {
-      // allowLoad on second try.
-      setAllowLoad(true);
-    }
-  }, [
-    rowsPerPage,
-    page,
-    orderBy,
-    sort === "desc",
-    reloadDummy,
-    // Why JSON.stringify?
-    // The way the useEffect dependency array works is by checking for strict (===) equivalency between all of the items in the array from the previous render and the new render.
-    // Example:  {}==={}                                   -> false -> different -> rerender
-    // Example2: JSON.stringify({}) === JSON.stringify({}) -> true  -> same      -> no rerender
-    JSON.stringify(filter),
-  ]);
-
-  function load() {
-    setLoading(true);
-    setError(false);
-
-    props
-      .onLoadData(page + 1, rowsPerPage, orderBy, sort, filter)
-      .then(({ data: d, total: t }) => {
-        setTotal(t);
-        setData(d);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-        setError(true);
-      });
-  }
-
-  function handleChangePage(p: number) {
-    setPage(p);
-  }
-
-  function handleChangeRowsPerPage(rows: number) {
-    setRowsPerPage(rows);
-  }
-
-  function handleChangeOrderBy(ob: string) {
-    let s: SortDirection | undefined;
-
-    if (orderBy && orderBy === ob) {
-      s = sort === "desc" ? "asc" : "desc";
-    }
-
-    setOrderBy(ob);
-    setSort(s);
-  }
-
-  function handleChangeFilter(ob: string, value: any) {
-    //TODO: IsOnChangeFilter still needed?
-    // if (props.onChangeFilter) {
-    //   props.onChangeFilter(ob, value);
-    // } else {
-    setFilter({ ...filter, [ob]: value });
-    // }
-  }
 
   function renderTable() {
     const ps = {

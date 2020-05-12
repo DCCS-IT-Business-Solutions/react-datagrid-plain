@@ -1,5 +1,6 @@
 import * as React from "react";
 import { SortDirection, ChangeFilterHandler } from "@dccs/react-table-plain";
+import { OnLoadData } from ".";
 
 export interface IDataGridState {
   total: number;
@@ -21,13 +22,18 @@ export interface IDataGridState {
   allowLoad: boolean;
   setAllowLoad: React.Dispatch<React.SetStateAction<boolean>>;
   error: boolean;
-  setError: React.Dispatch<React.SetStateAction<boolean>>;
   loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   data: any[];
-  setData: React.Dispatch<React.SetStateAction<any[]>>;
   reload: () => void;
-  reloadDummy: boolean;
+  handleChangePage(p: number): void;
+  handleChangeRowsPerPage(rows: number): void;
+  handleChangeOrderBy(ob: string): void;
+  handleChangeFilter(ob: string, value: any): void;
+  load(): void;
+  // Vorerst noch nicht von außen änderbar
+  // setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  // setError: React.Dispatch<React.SetStateAction<boolean>>;
+  // setData: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 export interface IPersistState {
@@ -36,6 +42,7 @@ export interface IPersistState {
 }
 
 export interface IUseDataGridProps {
+  onLoadData: OnLoadData;
   initialRowsPerPage?: number;
   initialOrderBy?: string;
   initialSort?: SortDirection;
@@ -64,7 +71,7 @@ const getStateFromStore = (props?: IUseDataGridProps) => {
   return undefined;
 };
 
-export function useDataGridState(props?: IUseDataGridProps) {
+export function useDataGridState(props: IUseDataGridProps) {
   const stateFromStore = getStateFromStore(props);
 
   const [rowsPerPage, setRowsPerPage] = React.useState(
@@ -89,6 +96,7 @@ export function useDataGridState(props?: IUseDataGridProps) {
     { [key: string]: any } | undefined
   >((stateFromStore && stateFromStore.filter) || undefined);
 
+  // Always use initial here? not sure
   const [allowLoad, setAllowLoad] = React.useState(
     props && props.initialLoad === false ? false : true
   );
@@ -102,6 +110,71 @@ export function useDataGridState(props?: IUseDataGridProps) {
   const reload = () => {
     setReload(!reloadDummy);
   };
+
+  function handleChangePage(p: number) {
+    setPage(p);
+  }
+
+  function handleChangeRowsPerPage(rows: number) {
+    setRowsPerPage(rows);
+  }
+
+  function handleChangeOrderBy(ob: string) {
+    let s: SortDirection | undefined;
+
+    if (orderBy && orderBy === ob) {
+      s = sort === "desc" ? "asc" : "desc";
+    }
+
+    setOrderBy(ob);
+    setSort(s);
+  }
+
+  function handleChangeFilter(ob: string, value: any) {
+    //TODO: IsOnChangeFilter still needed?
+    // if (props.onChangeFilter) {
+    //   props.onChangeFilter(ob, value);
+    // } else {
+    setFilter({ ...filter, [ob]: value });
+    // }
+  }
+
+  React.useEffect(() => {
+    if (allowLoad === true) {
+      load();
+    } else {
+      // allowLoad on second try.
+      setAllowLoad(true);
+    }
+  }, [
+    rowsPerPage,
+    page,
+    orderBy,
+    sort === "desc",
+    reloadDummy,
+    // Why JSON.stringify?
+    // The way the useEffect dependency array works is by checking for strict (===) equivalency between all of the items in the array from the previous render and the new render.
+    // Example:  {}==={}                                   -> false -> different -> rerender
+    // Example2: JSON.stringify({}) === JSON.stringify({}) -> true  -> same      -> no rerender
+    JSON.stringify(filter),
+  ]);
+
+  function load() {
+    setLoading(true);
+    setError(false);
+
+    props
+      .onLoadData(page + 1, rowsPerPage, orderBy, sort, filter)
+      .then(({ data: d, total: t }) => {
+        setTotal(t);
+        setData(d);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+        setError(true);
+      });
+  }
 
   const state: IDataGridState = {
     rowsPerPage,
@@ -119,13 +192,14 @@ export function useDataGridState(props?: IUseDataGridProps) {
     allowLoad,
     setAllowLoad,
     data,
-    setData,
     loading,
-    setLoading,
     error,
-    setError,
-    reloadDummy: reloadDummy,
     reload,
+    handleChangePage,
+    handleChangeRowsPerPage,
+    handleChangeOrderBy,
+    handleChangeFilter,
+    load,
   };
 
   React.useEffect(() => {

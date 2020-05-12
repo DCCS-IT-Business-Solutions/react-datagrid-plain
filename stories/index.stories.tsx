@@ -70,21 +70,19 @@ function SelectedRowExample() {
 }
 
 function ExternalStateExample() {
-  const datagridState = useDataGridState();
+  const datagridState = useDataGridState({
+    onLoadData: () => {
+      return new Promise((res) =>
+        setTimeout(() => {
+          return res({ total: sampleData1.length, data: sampleData1 });
+        }, 3000)
+      );
+    },
+  });
 
   return (
     <React.Fragment>
-      <DataGridPlain
-        state={datagridState}
-        colDef={demoColDefs}
-        onLoadData={() => {
-          return new Promise((res) =>
-            setTimeout(() => {
-              return res({ total: sampleData1.length, data: sampleData1 });
-            }, 3000)
-          );
-        }}
-      />
+      <DataGridPlain state={datagridState} colDef={demoColDefs} />
 
       <button onClick={() => datagridState.reload()}>Reload</button>
     </React.Fragment>
@@ -97,21 +95,18 @@ function ExternalStateLocalStorageExample() {
       store: "localStorage",
       uniqueID: "ExternalStateLocalStorageExample",
     },
+    onLoadData: () => {
+      return new Promise((res) =>
+        setTimeout(() => {
+          return res({ total: sampleData1.length, data: sampleData1 });
+        }, 3000)
+      );
+    },
   });
 
   return (
     <React.Fragment>
-      <DataGridPlain
-        state={datagridState}
-        colDef={demoColDefs}
-        onLoadData={() => {
-          return new Promise((res) =>
-            setTimeout(() => {
-              return res({ total: sampleData1.length, data: sampleData1 });
-            }, 3000)
-          );
-        }}
-      />
+      <DataGridPlain state={datagridState} colDef={demoColDefs} />
 
       <button onClick={() => datagridState.reload()}>Reload</button>
     </React.Fragment>
