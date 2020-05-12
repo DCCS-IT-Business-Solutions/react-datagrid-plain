@@ -4,10 +4,14 @@ import {
   IColDef,
   ITablePlainProps as ITableProps,
   SortDirection,
-  ChangeFilterHandler,
+  // ChangeFilterHandler,
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
-import { useDataGridState } from "./useDataGridState";
+import {
+  useDataGridState,
+  IDataGridState,
+  IUseDataGridProps,
+} from "./useDataGridState";
 
 export type OnLoadData = (
   page: number,
@@ -52,13 +56,18 @@ export interface IDataGridTexts {
     to?: number;
   }) => string;
 }
+
+export interface IDataGridWithExternalStateProps extends IDataGridProps {
+  state?: IDataGridState;
+}
+
+export interface IDataGridWithInternalStateProps
+  extends IDataGridProps,
+    IUseDataGridProps {}
+
 export interface IDataGridProps {
   texts?: IDataGridTexts;
-  initialLoad?: boolean;
   colDef: IColDef[];
-  initialRowsPerPage?: number;
-  initialOrderBy?: string;
-  initialSort?: SortDirection;
   onLoadData: OnLoadData;
   disablePaging?: boolean;
   tableTheme?: any;
@@ -87,11 +96,15 @@ export interface IDataGridProps {
   onChangeSelectedRow?: (data: any) => void;
   selectedRowProps?: (data: any) => object;
   rowSelectionColumnName?: string;
-  onChangeFilter?: ChangeFilterHandler;
   filter?: object;
 }
 
-export function DataGridPlain(props: IDataGridProps) {
+export function DataGridPlain(
+  props: IDataGridWithExternalStateProps | IDataGridWithInternalStateProps
+) {
+  debugger;
+  const internalState = useDataGridState();
+
   const {
     rowsPerPage,
     setRowsPerPage,
@@ -114,13 +127,7 @@ export function DataGridPlain(props: IDataGridProps) {
     setLoading,
     setTotal,
     reload,
-  } = useDataGridState({
-    initialLoad: props.initialLoad,
-    initialOrderBy: props.initialOrderBy,
-    initialRowsPerPage: props.initialRowsPerPage,
-    initialSort: props.initialSort,
-    onChangeFilter: props.onChangeFilter,
-  });
+  } = (props as IDataGridWithExternalStateProps).state || internalState;
 
   React.useEffect(() => {
     if (allowLoad === true) {
@@ -179,11 +186,12 @@ export function DataGridPlain(props: IDataGridProps) {
   }
 
   function handleChangeFilter(ob: string, value: any) {
-    if (props.onChangeFilter) {
-      props.onChangeFilter(ob, value);
-    } else {
-      setFilter({ ...filter, [ob]: value });
-    }
+    //TODO: IsOnChangeFilter still needed?
+    // if (props.onChangeFilter) {
+    //   props.onChangeFilter(ob, value);
+    // } else {
+    setFilter({ ...filter, [ob]: value });
+    // }
   }
 
   function renderTable() {
