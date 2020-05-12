@@ -30,29 +30,69 @@ export interface IDataGridState {
   reloadDummy: boolean;
 }
 
+export interface IPersistState {
+  store: "localStorage" | "sessionStorage";
+  uniqueID: string;
+}
+
 export interface IUseDataGridProps {
   initialRowsPerPage?: number;
   initialOrderBy?: string;
   initialSort?: SortDirection;
   initialLoad?: boolean;
   onChangeFilter?: ChangeFilterHandler;
+  persistState?: IPersistState;
 }
 
+const getStateFromStore = (props?: IUseDataGridProps) => {
+  if (props && props.persistState && props.persistState.uniqueID) {
+    if (props.persistState.store === "localStorage") {
+      const state = localStorage.getItem(props.persistState.uniqueID);
+
+      if (state) {
+        return JSON.parse(state) as IDataGridState;
+      }
+    } else if (props.persistState.store === "sessionStorage") {
+      const state = sessionStorage.getItem(props.persistState.uniqueID);
+
+      if (state) {
+        return JSON.parse(state) as IDataGridState;
+      }
+    }
+  }
+
+  return undefined;
+};
+
 export function useDataGridState(props?: IUseDataGridProps) {
-  debugger;
+  const stateFromStore = getStateFromStore(props);
+
   const [rowsPerPage, setRowsPerPage] = React.useState(
-    (props && props.initialRowsPerPage) || 10
+    (stateFromStore && stateFromStore.rowsPerPage) ||
+      (props && props.initialRowsPerPage) ||
+      10
   );
-  const [page, setPage] = React.useState(0);
-  const [total, setTotal] = React.useState(0);
-  const [orderBy, setOrderBy] = React.useState(props && props.initialOrderBy);
-  const [sort, setSort] = React.useState<SortDirection | undefined>();
+  const [page, setPage] = React.useState(
+    (stateFromStore && stateFromStore.page) || 0
+  );
+  const [total, setTotal] = React.useState(
+    (stateFromStore && stateFromStore.total) || 0
+  );
+  const [orderBy, setOrderBy] = React.useState(
+    (stateFromStore && stateFromStore.orderBy) ||
+      (props && props.initialOrderBy)
+  );
+  const [sort, setSort] = React.useState<SortDirection | undefined>(
+    (stateFromStore && stateFromStore.sort) || undefined
+  );
   const [filter, setFilter] = React.useState<
     { [key: string]: any } | undefined
-  >();
+  >((stateFromStore && stateFromStore.filter) || undefined);
+
   const [allowLoad, setAllowLoad] = React.useState(
-    props && props.initialLoad ? true : false
+    props && props.initialLoad === false ? false : true
   );
+
   const [data, setData] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(false);
@@ -87,6 +127,22 @@ export function useDataGridState(props?: IUseDataGridProps) {
     reloadDummy: reloadDummy,
     reload,
   };
+
+  React.useEffect(() => {
+    if (props && props.persistState && props.persistState.uniqueID) {
+      if (props.persistState.store === "localStorage") {
+        localStorage.setItem(
+          props.persistState.uniqueID,
+          JSON.stringify(state)
+        );
+      } else if (props.persistState.store === "sessionStorage") {
+        sessionStorage.setItem(
+          props.persistState.uniqueID,
+          JSON.stringify(state)
+        );
+      }
+    }
+  }, [state]);
 
   return state;
 }

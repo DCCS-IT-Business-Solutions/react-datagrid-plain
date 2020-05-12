@@ -30,11 +30,10 @@ const demoColDefs = [
 ];
 
 function SimpleExample() {
-  debugger;
-
   return (
     <DataGridPlain
       colDef={demoColDefs}
+      initialLoad={true}
       onLoadData={() =>
         new Promise((res) =>
           res({ total: sampleData1.length, data: sampleData1 })
@@ -80,78 +79,109 @@ function ExternalStateExample() {
         colDef={demoColDefs}
         onLoadData={() => {
           return new Promise((res) =>
-            res({ total: sampleData1.length, data: sampleData1 })
+            setTimeout(() => {
+              return res({ total: sampleData1.length, data: sampleData1 });
+            }, 3000)
           );
         }}
       />
 
-      {/* <button onClick={() => datagridState.reload()}>Reload</button> */}
+      <button onClick={() => datagridState.reload()}>Reload</button>
     </React.Fragment>
   );
 }
 
-storiesOf("DataGridPlain", module).add("simple", () => <SimpleExample />);
-// .add("initialOrderBy", () => (
-//   <DataGridPlain
-//     initialOrderBy="name"
-//     colDef={demoColDefs}
-//     onLoadData={(x, y, orderBy) => {
-//       return new Promise((res) =>
-//         res({ total: sampleData1.length, data: sampleData1 })
-//       );
-//     }}
-//   />
-// ))
-// .add("selectedRow", () => <SelectedRowExample />);
-//.add("externalState", () => <ExternalStateExample />);
+function ExternalStateLocalStorageExample() {
+  const datagridState = useDataGridState({
+    persistState: {
+      store: "localStorage",
+      uniqueID: "ExternalStateLocalStorageExample",
+    },
+  });
 
-// storiesOf("DataGridMui", module).add("simple", () => (
-//   <DataGridPlain
-//     colDef={demoColDefs}
-//     onLoadData={() =>
-//       new Promise((res) =>
-//         res({ total: sampleData1.length, data: sampleData1 })
-//       )
-//     }
-//     renderTable={(ps) => <TablePlain {...tableMuiTheme} {...ps} />}
-//     renderPaging={({
-//       total,
-//       rowsPerPage,
-//       page,
-//       handleChangePage,
-//       handleChangeRowsPerPage,
-//     }) => (
-//       <TablePagination
-//         component={(ps) => <div {...ps}>{ps.children}</div>}
-//         colSpan={demoColDefs != null ? demoColDefs.length : 1}
-//         count={total}
-//         rowsPerPage={rowsPerPage}
-//         page={page}
-//         onChangePage={(e, p) => handleChangePage(p)}
-//         onChangeRowsPerPage={(e) =>
-//           handleChangeRowsPerPage(parseInt(e.target.value, 10))
-//         }
-//         labelRowsPerPage={"Einträge pro Seite:"}
-//         labelDisplayedRows={({ from, to, count }) =>
-//           `${from}-${to} von ${count}`
-//         }
-//       />
-//     )}
-//   />
-// ));
+  return (
+    <React.Fragment>
+      <DataGridPlain
+        state={datagridState}
+        colDef={demoColDefs}
+        onLoadData={() => {
+          return new Promise((res) =>
+            setTimeout(() => {
+              return res({ total: sampleData1.length, data: sampleData1 });
+            }, 3000)
+          );
+        }}
+      />
 
-// storiesOf("DataGridSemanticUI", module).add("simple", () => (
-//   <DataGridPlain
-//     colDef={[
-//       { prop: "name", header: "Name" },
-//       { prop: "number", header: "Zahl" },
-//     ]}
-//     onLoadData={() =>
-//       new Promise((res) =>
-//         res({ total: sampleData1.length, data: sampleData1 })
-//       )
-//     }
-//     renderTable={(ps) => <TablePlain {...tableSemanticUITheme} {...ps} />}
-//     renderPaging={() => <small>Kein Paging in Semantic-UI momentan.</small>}
-//   />
-// ));
+      <button onClick={() => datagridState.reload()}>Reload</button>
+    </React.Fragment>
+  );
+}
+
+storiesOf("DataGridPlain", module)
+  .add("simple", () => <SimpleExample />)
+  .add("initialOrderBy", () => (
+    <DataGridPlain
+      initialOrderBy="name"
+      colDef={demoColDefs}
+      onLoadData={(x, y, orderBy) => {
+        return new Promise((res) =>
+          res({ total: sampleData1.length, data: sampleData1 })
+        );
+      }}
+    />
+  ))
+  .add("selectedRow", () => <SelectedRowExample />)
+  .add("externalState", () => <ExternalStateExample />)
+  .add("externalStateLocalStorage", () => <ExternalStateLocalStorageExample />);
+
+storiesOf("DataGridMui", module).add("simple", () => (
+  <DataGridPlain
+    colDef={demoColDefs}
+    onLoadData={() =>
+      new Promise((res) =>
+        res({ total: sampleData1.length, data: sampleData1 })
+      )
+    }
+    renderTable={(ps) => <TablePlain {...tableMuiTheme} {...ps} />}
+    renderPaging={({
+      total,
+      rowsPerPage,
+      page,
+      handleChangePage,
+      handleChangeRowsPerPage,
+    }) => (
+      <TablePagination
+        component={(ps) => <div {...ps}>{ps.children}</div>}
+        colSpan={demoColDefs != null ? demoColDefs.length : 1}
+        count={total}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onChangePage={(e, p) => handleChangePage(p)}
+        onChangeRowsPerPage={(e) =>
+          handleChangeRowsPerPage(parseInt(e.target.value, 10))
+        }
+        labelRowsPerPage={"Einträge pro Seite:"}
+        labelDisplayedRows={({ from, to, count }) =>
+          `${from}-${to} von ${count}`
+        }
+      />
+    )}
+  />
+));
+
+storiesOf("DataGridSemanticUI", module).add("simple", () => (
+  <DataGridPlain
+    colDef={[
+      { prop: "name", header: "Name" },
+      { prop: "number", header: "Zahl" },
+    ]}
+    onLoadData={() =>
+      new Promise((res) =>
+        res({ total: sampleData1.length, data: sampleData1 })
+      )
+    }
+    renderTable={(ps) => <TablePlain {...tableSemanticUITheme} {...ps} />}
+    renderPaging={() => <small>Kein Paging in Semantic-UI momentan.</small>}
+  />
+));

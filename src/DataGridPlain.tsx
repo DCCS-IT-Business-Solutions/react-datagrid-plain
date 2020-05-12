@@ -8,9 +8,10 @@ import {
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
 import {
-  useDataGridState,
+  // useDataGridState,
   IDataGridState,
   IUseDataGridProps,
+  useDataGridState,
 } from "./useDataGridState";
 
 export type OnLoadData = (
@@ -100,10 +101,11 @@ export interface IDataGridProps {
 }
 
 export function DataGridPlain(
-  props: IDataGridWithExternalStateProps | IDataGridWithInternalStateProps
+  props: IDataGridWithInternalStateProps | IDataGridWithExternalStateProps
 ) {
-  debugger;
-  const internalState = useDataGridState();
+  const internalState = useDataGridState(
+    props as IDataGridWithInternalStateProps
+  );
 
   const {
     rowsPerPage,
@@ -126,7 +128,7 @@ export function DataGridPlain(
     setError,
     setLoading,
     setTotal,
-    reload,
+    reloadDummy,
   } = (props as IDataGridWithExternalStateProps).state || internalState;
 
   React.useEffect(() => {
@@ -141,7 +143,7 @@ export function DataGridPlain(
     page,
     orderBy,
     sort === "desc",
-    reload,
+    reloadDummy,
     // Why JSON.stringify?
     // The way the useEffect dependency array works is by checking for strict (===) equivalency between all of the items in the array from the previous render and the new render.
     // Example:  {}==={}                                   -> false -> different -> rerender
