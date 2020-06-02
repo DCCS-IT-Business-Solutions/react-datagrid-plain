@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SortDirection, ChangeFilterHandler } from "@dccs/react-table-plain";
+import { SortDirection } from "@dccs/react-table-plain";
 import { OnLoadData } from ".";
 
 export interface IDataGridState {
@@ -47,7 +47,6 @@ export interface IUseDataGridProps {
   initialOrderBy?: string;
   initialSort?: SortDirection;
   initialLoad?: boolean;
-  onChangeFilter?: ChangeFilterHandler;
   persistState?: IPersistState;
 }
 
@@ -131,12 +130,7 @@ export function useDataState(props: IUseDataGridProps) {
   }
 
   function handleChangeFilter(ob: string, value: any) {
-    //TODO: IsOnChangeFilter still needed?
-    // if (props.onChangeFilter) {
-    //   props.onChangeFilter(ob, value);
-    // } else {
     setFilter({ ...filter, [ob]: value });
-    // }
   }
 
   React.useEffect(() => {
