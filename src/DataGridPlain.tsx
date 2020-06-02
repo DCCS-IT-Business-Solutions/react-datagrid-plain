@@ -8,11 +8,10 @@ import {
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
 import {
-  // useDataGridState,
   IDataGridState,
   IUseDataGridProps,
-  useDataGridState,
-} from "./useDataGridState";
+  useDataState,
+} from "./useDataState";
 
 export type OnLoadData = (
   page: number,
@@ -102,9 +101,7 @@ export interface IDataGridProps {
 export function DataGridPlain(
   props: IDataGridWithInternalStateProps | IDataGridWithExternalStateProps
 ) {
-  const internalState = useDataGridState(
-    props as IDataGridWithInternalStateProps
-  );
+  const internalState = useDataState(props as IDataGridWithInternalStateProps);
 
   const {
     rowsPerPage,

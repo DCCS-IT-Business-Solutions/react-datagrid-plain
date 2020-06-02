@@ -71,7 +71,7 @@ const getStateFromStore = (props?: IUseDataGridProps) => {
   return undefined;
 };
 
-export function useDataGridState(props: IUseDataGridProps) {
+export function useDataState(props: IUseDataGridProps) {
   const stateFromStore = getStateFromStore(props);
 
   const [rowsPerPage, setRowsPerPage] = React.useState(
