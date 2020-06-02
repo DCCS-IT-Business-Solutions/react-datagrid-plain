@@ -4,10 +4,14 @@ import {
   IColDef,
   ITablePlainProps as ITableProps,
   SortDirection,
-  ChangeFilterHandler
+  // ChangeFilterHandler,
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
-import { DataGridState } from "./DataGridStateContext";
+import {
+  IDataGridState,
+  IUseDataGridProps,
+  useDataState,
+} from "./useDataState";
 
 export type OnLoadData = (
   page: number,
@@ -25,7 +29,7 @@ export interface IRenderPagingProps extends IState {
   labelDisplayedRows?: ({
     count,
     from,
-    to
+    to,
   }: {
     count?: number;
     from?: number;
@@ -34,7 +38,6 @@ export interface IRenderPagingProps extends IState {
   handleChangePage: (page: number) => void;
   handleChangeRowsPerPage: (rows: number) => void;
 }
-
 export interface IDataGridTexts {
   errorText?: string;
   loadingText?: string;
@@ -46,21 +49,25 @@ export interface IDataGridTexts {
   labelDisplayedRows?: ({
     count,
     from,
-    to
+    to,
   }: {
     count?: number;
     from?: number;
     to?: number;
   }) => string;
 }
+
+export interface IDataGridWithExternalStateProps extends IDataGridProps {
+  state?: IDataGridState;
+}
+
+export interface IDataGridWithInternalStateProps
+  extends IDataGridProps,
+    IUseDataGridProps {}
+
 export interface IDataGridProps {
   texts?: IDataGridTexts;
-  initialLoad?: boolean;
   colDef: IColDef[];
-  initialRowsPerPage?: number;
-  initialOrderBy?: string;
-  initialSort?: SortDirection;
-  onLoadData: OnLoadData;
   disablePaging?: boolean;
   tableTheme?: any;
   onRowClick?: (data: any) => void;
@@ -88,133 +95,38 @@ export interface IDataGridProps {
   onChangeSelectedRow?: (data: any) => void;
   selectedRowProps?: (data: any) => object;
   rowSelectionColumnName?: string;
-  onChangeFilter?: ChangeFilterHandler;
   filter?: object;
 }
 
-DataGridPlain.defaultProps = {
-  initialLoad: true
-};
+export function DataGridPlain(
+  props: IDataGridWithInternalStateProps | IDataGridWithExternalStateProps
+) {
+  const internalState = useDataState(props as IDataGridWithInternalStateProps);
 
-export function DataGridPlain(props: IDataGridProps) {
-  // Internal state...if there is no DataGridStateProvider.
-  const [rowsPerPage, setRowsPerPage] = React.useState(
-    props.initialRowsPerPage || 10
-  );
-  const [page, setPage] = React.useState(0);
-  const [allowLoad, setAllowLoad] = React.useState(
-    props.initialLoad === true ? true : false
-  );
-  const [total, setTotal] = React.useState(0);
-  const [orderBy, setOrderBy] = React.useState(props.initialOrderBy);
-  const [sort, setSort] = React.useState<SortDirection | undefined>();
-  const [filter, setFilter] = React.useState<
-    { [key: string]: any } | undefined
-  >();
-
-  // Do we have a custom context,...
-  const state = React.useContext(DataGridState) || {
+  const {
     rowsPerPage,
-    setRowsPerPage,
     page,
-    setPage,
     total,
-    setTotal,
     orderBy,
-    setOrderBy,
     sort,
-    setSort,
-    filter: props.filter || filter,
-    setFilter,
-    reloadDummy: false,
-    reload: () => {
-      throw new Error(
-        "No supported in DateGridPlain, only in DataGridStateProvider."
-      );
-    }
-  };
-
-  const [data, setData] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(false);
-
-  React.useEffect(() => {
-    if (allowLoad === true) {
-      load();
-    } else {
-      // allowLoad on second try.
-      setAllowLoad(true);
-    }
-  }, [
-    state.rowsPerPage,
-    state.page,
-    state.orderBy,
-    state.sort === "desc",
-    state.reloadDummy,
-    // Why JSON.stringify?
-    // The way the useEffect dependency array works is by checking for strict (===) equivalency between all of the items in the array from the previous render and the new render.
-    // Example:  {}==={}                                   -> false -> different -> rerender
-    // Example2: JSON.stringify({}) === JSON.stringify({}) -> true  -> same      -> no rerender
-    JSON.stringify(state.filter)
-  ]);
-
-  function load() {
-    setLoading(true);
-    setError(false);
-
-    props
-      .onLoadData(
-        state.page + 1,
-        state.rowsPerPage,
-        state.orderBy,
-        state.sort,
-        state.filter
-      )
-      .then(({ data: d, total: t }) => {
-        state.setTotal(t);
-        setData(d);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-        setError(true);
-      });
-  }
-
-  function handleChangePage(p: number) {
-    state.setPage(p);
-  }
-
-  function handleChangeRowsPerPage(rows: number) {
-    state.setRowsPerPage(rows);
-  }
-
-  function handleChangeOrderBy(ob: string) {
-    let s: SortDirection | undefined;
-
-    if (state.orderBy && state.orderBy === ob) {
-      s = state.sort === "desc" ? "asc" : "desc";
-    }
-
-    state.setOrderBy(ob);
-    state.setSort(s);
-  }
-
-  function handleChangeFilter(ob: string, value: any) {
-    if (props.onChangeFilter) {
-      props.onChangeFilter(ob, value);
-    } else {
-      state.setFilter({ ...state.filter, [ob]: value });
-    }
-  }
+    filter,
+    data,
+    loading,
+    error,
+    handleChangeOrderBy,
+    handleChangeFilter,
+    handleChangeRowsPerPage,
+    handleChangePage,
+    load,
+  } = (props as IDataGridWithExternalStateProps).state || internalState;
 
   function renderTable() {
     const ps = {
       data,
       colDef: props.colDef,
-      orderBy: state.orderBy,
-      sort: state.sort,
-      filter: state.filter,
+      orderBy: orderBy,
+      sort: sort,
+      filter: filter,
       onChangeOrderBy: handleChangeOrderBy,
       onChangeFilter: handleChangeFilter,
       onRowClick: props.onRowClick,
@@ -222,7 +134,7 @@ export function DataGridPlain(props: IDataGridProps) {
       selectedRow: props.selectedRow,
       selectedRowProps: props.selectedRowProps,
       onChangeSelectedRow: props.onChangeSelectedRow,
-      rowSelectionColumnName: props.rowSelectionColumnName
+      rowSelectionColumnName: props.rowSelectionColumnName,
     };
     if (props.renderTable != null) {
       return props.renderTable(ps);
@@ -275,13 +187,18 @@ export function DataGridPlain(props: IDataGridProps) {
       const labelDisplayedRows = props.texts && props.texts.labelDisplayedRows;
 
       return props.renderPaging({
-        ...state,
+        rowsPerPage,
+        page,
+        total,
+        orderBy,
+        sort,
+        filter,
         labelRowsPerPage: labelRowsPerPage,
         backIconButtonText: backIconButtonText,
         nextIconButtonText: nextIconButtonText,
         labelDisplayedRows: labelDisplayedRows,
         handleChangePage,
-        handleChangeRowsPerPage
+        handleChangeRowsPerPage,
       });
     }
     let pagingText = "No paging available right now. Check back later...";

@@ -7,10 +7,7 @@ import { TablePlain } from "@dccs/react-table-plain";
 import { tableMuiTheme } from "@dccs/react-table-mui";
 import { tableSemanticUITheme } from "@dccs/react-table-semantic-ui";
 import { TablePagination } from "@material-ui/core";
-import {
-  DataGridStateProvider,
-  DataGridState
-} from "../src/DataGridStateContext";
+import { useDataGridState } from "../src/useDataGridState";
 
 const sampleData1 = [
   { name: "A", number: 1 },
@@ -24,13 +21,27 @@ const sampleData1 = [
   { name: "I", number: 9 },
   { name: "J", number: 10 },
   { name: "K", number: 11 },
-  { name: "L", number: 12 }
+  { name: "L", number: 12 },
 ];
 
 const demoColDefs = [
   { prop: "name", header: "Name", sortable: true },
-  { prop: "number", header: "Zahl" }
+  { prop: "number", header: "Zahl" },
 ];
+
+function SimpleExample() {
+  return (
+    <DataGridPlain
+      colDef={demoColDefs}
+      initialLoad={true}
+      onLoadData={() =>
+        new Promise((res) =>
+          res({ total: sampleData1.length, data: sampleData1 })
+        )
+      }
+    />
+  );
+}
 
 function SelectedRowExample() {
   const [selectedRow, setSelectedRow] = React.useState();
@@ -50,7 +61,7 @@ function SelectedRowExample() {
       onChangeSelectedRow={handleEditMode}
       colDef={demoColDefs}
       onLoadData={() => {
-        return new Promise(res =>
+        return new Promise((res) =>
           res({ total: sampleData1.length, data: sampleData1 })
         );
       }}
@@ -58,88 +69,91 @@ function SelectedRowExample() {
   );
 }
 
-function InitialLoadWithStateProviderExample() {
-  return (
-    <DataGridStateProvider>
-      <InitialLoadExample />
-    </DataGridStateProvider>
-  );
-}
-
-function InitialLoadExample() {
-  const context = React.useContext(DataGridState);
+function ExternalStateExample() {
+  const datagridState = useDataGridState({
+    onLoadData: () => {
+      return new Promise((res) =>
+        setTimeout(() => {
+          return res({ total: sampleData1.length, data: sampleData1 });
+        }, 3000)
+      );
+    },
+  });
 
   return (
     <React.Fragment>
-      <button
-        onClick={() => {
-          if (context) {
-            context.reload();
-          }
-        }}
-      >
-        RELOAD
-      </button>
-      <DataGridPlain
-        initialLoad={false}
-        colDef={demoColDefs}
-        onLoadData={() => {
-          return new Promise(res =>
-            res({ total: sampleData1.length, data: sampleData1 })
-          );
-        }}
-      />
+      <DataGridPlain state={datagridState} colDef={demoColDefs} />
+
+      <button onClick={() => datagridState.reload()}>Reload</button>
+    </React.Fragment>
+  );
+}
+
+function ExternalStateLocalStorageExample() {
+  const datagridState = useDataGridState({
+    persistState: {
+      store: "localStorage",
+      uniqueID: "ExternalStateLocalStorageExample",
+    },
+    onLoadData: () => {
+      return new Promise((res) =>
+        setTimeout(() => {
+          return res({ total: sampleData1.length, data: sampleData1 });
+        }, 3000)
+      );
+    },
+  });
+
+  return (
+    <React.Fragment>
+      <DataGridPlain state={datagridState} colDef={demoColDefs} />
+
+      <button onClick={() => datagridState.reload()}>Reload</button>
     </React.Fragment>
   );
 }
 
 storiesOf("DataGridPlain", module)
-  .add("simple", () => (
-    <DataGridPlain
-      colDef={demoColDefs}
-      onLoadData={() =>
-        new Promise(res =>
-          res({ total: sampleData1.length, data: sampleData1 })
-        )
-      }
-    />
-  ))
+  .add("simple", () => <SimpleExample />)
   .add("initialOrderBy", () => (
     <DataGridPlain
       initialOrderBy="name"
       colDef={demoColDefs}
       onLoadData={(x, y, orderBy) => {
-        return new Promise(res =>
+        return new Promise((res) =>
           res({ total: sampleData1.length, data: sampleData1 })
         );
       }}
     />
   ))
   .add("selectedRow", () => <SelectedRowExample />)
-  .add("initialLoad: False", () => <InitialLoadWithStateProviderExample />);
+  .add("externalState", () => <ExternalStateExample />)
+  .add("externalStateLocalStorage", () => <ExternalStateLocalStorageExample />);
 
 storiesOf("DataGridMui", module).add("simple", () => (
   <DataGridPlain
     colDef={demoColDefs}
     onLoadData={() =>
-      new Promise(res => res({ total: sampleData1.length, data: sampleData1 }))
+      new Promise((res) =>
+        res({ total: sampleData1.length, data: sampleData1 })
+      )
     }
-    renderTable={ps => <TablePlain {...tableMuiTheme} {...ps} />}
+    renderTable={(ps) => <TablePlain {...tableMuiTheme} {...ps} />}
     renderPaging={({
       total,
       rowsPerPage,
       page,
       handleChangePage,
-      handleChangeRowsPerPage
+      handleChangeRowsPerPage,
     }) => (
       <TablePagination
-        component={ps => <div {...ps}>{ps.children}</div>}
+        component={(ps) => <div {...ps}>{ps.children}</div>}
         colSpan={demoColDefs != null ? demoColDefs.length : 1}
         count={total}
         rowsPerPage={rowsPerPage}
         page={page}
         onChangePage={(e, p) => handleChangePage(p)}
-        onChangeRowsPerPage={e =>
+        onChangeRowsPerPage={(e) =>
           handleChangeRowsPerPage(parseInt(e.target.value, 10))
         }
         labelRowsPerPage={"Einträge pro Seite:"}
@@ -155,12 +169,14 @@ storiesOf("DataGridSemanticUI", module).add("simple", () => (
   <DataGridPlain
     colDef={[
       { prop: "name", header: "Name" },
-      { prop: "number", header: "Zahl" }
+      { prop: "number", header: "Zahl" },
     ]}
     onLoadData={() =>
-      new Promise(res => res({ total: sampleData1.length, data: sampleData1 }))
+      new Promise((res) =>
+        res({ total: sampleData1.length, data: sampleData1 })
+      )
     }
-    renderTable={ps => <TablePlain {...tableSemanticUITheme} {...ps} />}
+    renderTable={(ps) => <TablePlain {...tableSemanticUITheme} {...ps} />}
     renderPaging={() => <small>Kein Paging in Semantic-UI momentan.</small>}
   />
 ));
