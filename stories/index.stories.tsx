@@ -1,13 +1,11 @@
 import * as React from "react";
-
 import { storiesOf } from "@storybook/react";
-
 import { DataGridPlain } from "../src/DataGridPlain";
 import { TablePlain } from "@dccs/react-table-plain";
 import { tableMuiTheme } from "@dccs/react-table-mui";
 import { tableSemanticUITheme } from "@dccs/react-table-semantic-ui";
 import { TablePagination } from "@material-ui/core";
-import { useDataGridState } from "../src/useDataGridState";
+import { useDataState } from "../src/useDataState";
 
 const sampleData1 = [
   { name: "A", number: 1 },
@@ -70,7 +68,7 @@ function SelectedRowExample() {
 }
 
 function ExternalStateExample() {
-  const datagridState = useDataGridState({
+  const datagridState = useDataState({
     onLoadData: () => {
       return new Promise((res) =>
         setTimeout(() => {
@@ -90,7 +88,7 @@ function ExternalStateExample() {
 }
 
 function ExternalStateLocalStorageExample() {
-  const datagridState = useDataGridState({
+  const datagridState = useDataState({
     persistState: {
       store: "localStorage",
       uniqueID: "ExternalStateLocalStorageExample",
