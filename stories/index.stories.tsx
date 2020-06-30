@@ -94,6 +94,7 @@ function ExternalStateLocalStorageExample() {
       uniqueID: "ExternalStateLocalStorageExample",
     },
     onLoadData: () => {
+      debugger;
       return new Promise((res) =>
         setTimeout(() => {
           return res({ total: sampleData1.length, data: sampleData1 });
@@ -116,8 +117,19 @@ storiesOf("DataGridPlain", module)
   .add("initialOrderBy", () => (
     <DataGridPlain
       initialOrderBy="name"
+      initialSort="asc"
+      initialRowsPerPage={100}
       colDef={demoColDefs}
-      onLoadData={(x, y, orderBy) => {
+      onLoadData={(page, rowsPerPage, orderBy, sort, filter) => {
+        console.log(
+          "OnloadData Props",
+          filter,
+          rowsPerPage,
+          page,
+          orderBy,
+          sort
+        );
+
         return new Promise((res) =>
           res({ total: sampleData1.length, data: sampleData1 })
         );

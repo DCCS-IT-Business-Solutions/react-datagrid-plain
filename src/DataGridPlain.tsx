@@ -4,14 +4,9 @@ import {
   IColDef,
   ITablePlainProps as ITableProps,
   SortDirection,
-  // ChangeFilterHandler,
 } from "@dccs/react-table-plain";
 import { IState } from "./IState";
-import {
-  IDataGridState,
-  IUseDataGridProps,
-  useDataState,
-} from "./useDataState";
+import { IDataState, IUseDataStateProps, useDataState } from "./useDataState";
 
 export type OnLoadData = (
   page: number,
@@ -58,12 +53,12 @@ export interface IDataGridTexts {
 }
 
 export interface IDataGridWithExternalStateProps extends IDataGridProps {
-  state?: IDataGridState;
+  state?: IDataState;
 }
 
 export interface IDataGridWithInternalStateProps
   extends IDataGridProps,
-    IUseDataGridProps {}
+    IUseDataStateProps {}
 
 export interface IDataGridProps {
   texts?: IDataGridTexts;
@@ -95,7 +90,6 @@ export interface IDataGridProps {
   onChangeSelectedRow?: (data: any) => void;
   selectedRowProps?: (data: any) => object;
   rowSelectionColumnName?: string;
-  filter?: object;
 }
 
 export function DataGridPlain(
