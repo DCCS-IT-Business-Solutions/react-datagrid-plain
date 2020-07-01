@@ -94,7 +94,6 @@ function ExternalStateLocalStorageExample() {
       uniqueID: "ExternalStateLocalStorageExample",
     },
     onLoadData: () => {
-      debugger;
       return new Promise((res) =>
         setTimeout(() => {
           return res({ total: sampleData1.length, data: sampleData1 });

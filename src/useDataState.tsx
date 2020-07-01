@@ -38,6 +38,7 @@ export interface IUseDataStateProps {
   initialOrderBy?: string;
   initialSort?: SortDirection;
   initialLoad?: boolean;
+  initialFilter?: { [key: string]: any };
   persistState?: IPersistState;
 }
 
@@ -84,7 +85,7 @@ export function useDataState(props: IUseDataStateProps) {
   );
   const [filter, setFilter] = React.useState<
     { [key: string]: any } | undefined
-  >((stateFromStore && stateFromStore.filter) || undefined);
+  >((stateFromStore && stateFromStore.filter) || props.initialFilter);
 
   // Always use initial here? not sure
   const [allowLoad, setAllowLoad] = React.useState(
