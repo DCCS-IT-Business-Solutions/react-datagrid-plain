@@ -38,6 +38,7 @@ export interface IUseDataStateProps {
   initialOrderBy?: string;
   initialSort?: SortDirection;
   initialLoad?: boolean;
+  initialPage?: number;
   initialFilter?: { [key: string]: any };
   persistState?: IPersistState;
 }
@@ -71,7 +72,7 @@ export function useDataState(props: IUseDataStateProps) {
       10
   );
   const [page, setPage] = React.useState(
-    (stateFromStore && stateFromStore.page) || 0
+    (stateFromStore && stateFromStore.page) || (props && props.initialPage)
   );
   const [total, setTotal] = React.useState(
     (stateFromStore && stateFromStore.total) || 0
