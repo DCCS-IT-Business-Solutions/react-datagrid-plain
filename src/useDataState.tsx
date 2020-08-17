@@ -72,7 +72,7 @@ export function useDataState(props: IUseDataStateProps) {
       10
   );
   const [page, setPage] = React.useState(
-    (stateFromStore && stateFromStore.page) || (props && props.initialPage)
+    (stateFromStore && stateFromStore.page) || (props && props.initialPage) || 0
   );
   const [total, setTotal] = React.useState(
     (stateFromStore && stateFromStore.total) || 0
