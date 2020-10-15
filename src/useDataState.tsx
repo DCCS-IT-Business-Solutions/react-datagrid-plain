@@ -66,7 +66,7 @@ const getStateFromStore = (props?: IUseDataStateProps) => {
 export function useDataState(props: IUseDataStateProps) {
   const stateFromStore = getStateFromStore(props);
 
-  const [rowsPerPage, setRowsPerPage] = React.useState(
+  const [rowsPerPage, _setRowsPerPage] = React.useState(
     (stateFromStore && stateFromStore.rowsPerPage) ||
       (props && props.initialRowsPerPage) ||
       10
@@ -124,6 +124,11 @@ export function useDataState(props: IUseDataStateProps) {
 
   function handleChangeFilter(ob: string, value: any) {
     setFilter({ ...filter, [ob]: value });
+  }
+
+  function setRowsPerPage(count: number) {
+    setPage(0); // reset to first page.
+    _setRowsPerPage(count);
   }
 
   React.useEffect(() => {

@@ -20,6 +20,23 @@ const sampleData1 = [
   { name: "J", number: 10 },
   { name: "K", number: 11 },
   { name: "L", number: 12 },
+  { name: "L", number: 13 },
+  { name: "L", number: 14 },
+  { name: "L", number: 15 },
+  { name: "L", number: 16 },
+  { name: "L", number: 17 },
+  { name: "L", number: 18 },
+  { name: "L", number: 19 },
+  { name: "L", number: 20 },
+  { name: "L", number: 21 },
+  { name: "L", number: 22 },
+  { name: "L", number: 23 },
+  { name: "L", number: 24 },
+  { name: "L", number: 25 },
+  { name: "L", number: 26 },
+  { name: "L", number: 27 },
+  { name: "L", number: 28 },
+  { name: "L", number: 29 },
 ];
 
 const demoColDefs = [
@@ -27,14 +44,21 @@ const demoColDefs = [
   { prop: "number", header: "Zahl" },
 ];
 
+function handlePaging(data: any[], page: number, rowsPerPage: number) {
+  return data.slice(rowsPerPage * (page - 1), rowsPerPage * page);
+}
+
 function SimpleExample() {
   return (
     <DataGridPlain
       colDef={demoColDefs}
       initialLoad={true}
-      onLoadData={() =>
+      onLoadData={(page, rowsPerPage) =>
         new Promise((res) =>
-          res({ total: sampleData1.length, data: sampleData1 })
+          res({
+            total: sampleData1.length,
+            data: handlePaging(sampleData1, page, rowsPerPage),
+          })
         )
       }
     />
@@ -142,9 +166,12 @@ storiesOf("DataGridPlain", module)
 storiesOf("DataGridMui", module).add("simple", () => (
   <DataGridPlain
     colDef={demoColDefs}
-    onLoadData={() =>
+    onLoadData={(page, rowsPerPage) =>
       new Promise((res) =>
-        res({ total: sampleData1.length, data: sampleData1 })
+        res({
+          total: sampleData1.length,
+          data: handlePaging(sampleData1, page, rowsPerPage),
+        })
       )
     }
     renderTable={(ps) => <TablePlain {...tableMuiTheme} {...ps} />}
