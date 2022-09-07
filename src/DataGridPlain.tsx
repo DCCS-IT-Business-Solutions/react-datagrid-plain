@@ -129,6 +129,13 @@ export function DataGridPlain(
       selectedRowProps: props.selectedRowProps,
       onChangeSelectedRow: props.onChangeSelectedRow,
       rowSelectionColumnName: props.rowSelectionColumnName,
+      rowProps: props.rowProps,
+      renderHeaderCell: props.renderHeaderCell,
+      renderFooterCell: props.renderFooterCell,
+      renderFilter: props.renderFilter,
+      renderExpansionIndicator: props.renderExpansionIndicator,
+      cellProps: props.cellProps,
+      ellipsis: props.ellipsis,
     };
     if (props.renderTable != null) {
       return props.renderTable(ps);
