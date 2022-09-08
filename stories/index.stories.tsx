@@ -53,6 +53,7 @@ function SimpleExample() {
     <DataGridPlain
       colDef={demoColDefs}
       initialLoad={true}
+      rowProps={data => ({onDoubleClick: () => console.log(data)})}
       onLoadData={(page, rowsPerPage) =>
         new Promise((res) =>
           res({
@@ -166,6 +167,7 @@ storiesOf("DataGridPlain", module)
 storiesOf("DataGridMui", module).add("simple", () => (
   <DataGridPlain
     colDef={demoColDefs}
+    rowProps={data => ({onDoubleClick: () => console.log(data)})}
     onLoadData={(page, rowsPerPage) =>
       new Promise((res) =>
         res({
