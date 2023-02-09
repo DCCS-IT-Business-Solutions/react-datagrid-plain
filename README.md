@@ -1,7 +1,5 @@
 # react-datagrid-plain as been merged into https://github.com/DCCS-IT-Business-Solutions/react-datagrid-mui
 
-<hr/>
-
 We stopped making ui-libary-agnostic components and doubled down on [MaterialUI](https://mui.com).
 
 # react-datagrid-plain &middot; ![travis build](https://img.shields.io/travis/DCCS-IT-Business-Solutions/react-datagrid-plain.svg) ![npm version](https://img.shields.io/npm/v/@dccs/react-datagrid-plain.svg)
